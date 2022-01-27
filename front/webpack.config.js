@@ -1,4 +1,5 @@
 // path は、パス文字列を操作するための node.js ビルドインのツール
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
 
 module.exports = {
