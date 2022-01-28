@@ -8,7 +8,7 @@ module.exports = {
   // コードが最適化されサイズが小さくなる。
   mode: 'development',
   // 初めに読み込まれるファイル
-  entry: './src/index.ts',
+  entry: './src/index.tsx',
   // 出力先の設定
   output: {
     // 出力先ファイル名

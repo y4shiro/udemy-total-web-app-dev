@@ -36,3 +36,7 @@ rules:
       varsIgnorePattern: '^_'
   prettier/prettier:
     - error
+  # TypeScript での no-use-before-define を有効にする
+  no-use-before-define": off
+  '@typescript-eslint/no-use-before-define':
+    - error
