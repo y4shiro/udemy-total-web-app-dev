@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 // path は、パス文字列を操作するための node.js ビルドインのツール
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   // デバッグ情報を付与する。
@@ -29,5 +31,14 @@ module.exports = {
   resolve: {
     // import する対象の拡張子
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
+  },
+  plugins: [
+    new CleanWebpackPlugin(),
+    new HtmlWebpackPlugin({ template: 'resources/index.html' }),
+  ],
+  devServer: {
+    static: path.join(__dirname, 'dist'),
+    compress: true,
+    port: 8080,
   },
 };
