@@ -1,13 +1,16 @@
 import React from 'react';
 import {
   Avatar,
+  Button,
   Chip,
   Container,
+  Grid,
   InputLabel,
   Paper,
   TextField,
   makeStyles,
 } from '@material-ui/core';
+import { Done as DoneIcon, Delete as DeleteIcon } from '@material-ui/icons';
 import dayjs from 'dayjs';
 
 const useStyle = makeStyles((theme) => ({
@@ -18,6 +21,12 @@ const useStyle = makeStyles((theme) => ({
   },
   paper: {
     padding: theme.spacing(1),
+  },
+  rightActions: {
+    textAlign: 'right',
+  },
+  cancelButton: {
+    color: theme.palette.error.main,
   },
 }));
 
@@ -38,6 +47,22 @@ export const Facility: React.VFC = () => {
           <Chip label="更新者名" avatar={<Avatar />}></Chip>
           {dayjs(new Date()).format('YYYY-MM-DD HH:mm')}
         </p>
+        <Grid container>
+          <Grid item xs={6}>
+            <Button className={style.cancelButton} startIcon={<DeleteIcon />}>
+              削除
+            </Button>
+          </Grid>
+          <Grid item xs={6} className={style.rightActions}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<DoneIcon />}
+            >
+              保存
+            </Button>
+          </Grid>
+        </Grid>
       </Paper>
     </Container>
   );
