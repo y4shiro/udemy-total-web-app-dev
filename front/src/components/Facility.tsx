@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Avatar,
   Button,
@@ -11,7 +11,9 @@ import {
   makeStyles,
 } from '@material-ui/core';
 import { Done as DoneIcon, Delete as DeleteIcon } from '@material-ui/icons';
+
 import dayjs from 'dayjs';
+import { IFacility } from '../models/IFacility';
 
 const useStyle = makeStyles((theme) => ({
   root: {
@@ -30,21 +32,50 @@ const useStyle = makeStyles((theme) => ({
   },
 }));
 
+const initFacility: IFacility = {
+  id: '',
+  name: 'name の初期値',
+  note: 'note の初期値',
+  system: {
+    createDate: new Date(),
+    createUser: {
+      displayName: 'ebihara kenji',
+      email: '',
+      face: 'https://img.icons8.com/color/48/000000/human-head.png',
+    },
+    lastUpdateUser: {
+      displayName: 'ebihara kenji',
+      email: '',
+      face: 'https://img.icons8.com/color/48/000000/human-head.png',
+    },
+    lastUpdate: new Date(),
+  },
+};
+
 export const Facility: React.VFC = () => {
   const style = useStyle();
+  const [facility, setFacility] = useState(initFacility);
+  const { system } = initFacility;
+
   return (
     <Container maxWidth="sm" className={style.root}>
       <Paper className={style.paper}>
-        <TextField label="設備名" fullWidth />
-        <TextField label="詳細" fullWidth multiline />
+        <TextField label="設備名" fullWidth value={facility.name} />
+        <TextField label="詳細" fullWidth multiline value={facility.note} />
         <InputLabel shrink>登録者</InputLabel>
         <p>
-          <Chip label="登録者名" avatar={<Avatar />}></Chip>
+          <Chip
+            label={system.createUser.displayName}
+            avatar={<Avatar src={system.createUser.face} />}
+          ></Chip>
           {dayjs(new Date()).format('YYYY-MM-DD HH:mm')}
         </p>
         <InputLabel shrink>更新者</InputLabel>
         <p>
-          <Chip label="更新者名" avatar={<Avatar />}></Chip>
+          <Chip
+            label={system.lastUpdateUser.displayName}
+            avatar={<Avatar src={system.createUser.face} />}
+          ></Chip>
           {dayjs(new Date()).format('YYYY-MM-DD HH:mm')}
         </p>
         <Grid container>
