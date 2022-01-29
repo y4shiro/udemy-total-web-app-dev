@@ -1,5 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Facility } from './components/Facility';
+import { Reservation } from './components/Reservation';
 
-ReactDOM.render(<Facility />, document.getElementById('container'));
+ReactDOM.render(<Reservation />, document.getElementById('container'));

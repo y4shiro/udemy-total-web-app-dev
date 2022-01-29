@@ -1,4 +1,6 @@
-import React, { ChangeEvent, useCallback, useState } from 'react';
+import React from 'react';
+import dayjs from 'dayjs';
+
 import {
   Avatar,
   Button,
@@ -6,20 +8,22 @@ import {
   Container,
   Grid,
   InputLabel,
+  makeStyles,
   Paper,
   TextField,
-  makeStyles,
 } from '@material-ui/core';
 import { Done as DoneIcon, Delete as DeleteIcon } from '@material-ui/icons';
-import dayjs from 'dayjs';
-import { useForm, Controller } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 
-import { IFacility } from '../models/IFacility';
+import { IReservation } from '../models/IReservation';
 
-const initFacility: IFacility = {
-  id: '',
-  name: 'name の初期値',
-  note: 'note の初期値',
+const initReservation: IReservation = {
+  id: '001',
+  facilityId: '001',
+  subject: '目的01',
+  description: '説明001',
+  startDate: dayjs(),
+  endDate: dayjs().add(1, 'hour'),
   system: {
     createDate: new Date(),
     createUser: {
@@ -51,14 +55,16 @@ const useStyle = makeStyles((theme) => ({
   cancelButton: {
     color: theme.palette.error.main,
   },
+  userChip: {
+    margin: theme.spacing(1),
+  },
 }));
 
-export const Facility: React.VFC = () => {
+export const Reservation: React.VFC = () => {
   const style = useStyle();
-  const [facility, setFacility] = useState(initFacility);
-  const { system } = initFacility;
-  const { register, errors, control } = useForm({
-    defaultValues: initFacility,
+  const { system } = initReservation;
+  const { errors, control } = useForm<IReservation>({
+    defaultValues: initReservation,
     mode: 'onBlur',
   });
 
@@ -67,29 +73,29 @@ export const Facility: React.VFC = () => {
       <Paper className={style.paper}>
         <Controller
           control={control}
-          name="name"
+          name="subject"
           rules={{ required: true }}
           as={
             <TextField
-              label="設備名"
+              label="目的"
               fullWidth
-              error={!!errors.name}
-              helperText={errors.name ? '必須です' : ''}
+              error={!!errors.subject}
+              helperText={errors.subject ? '必須です' : ''}
             />
           }
         />
 
         <Controller
           control={control}
-          name="note"
+          name="description"
           rules={{ required: true }}
           as={
             <TextField
               label="詳細"
               fullWidth
               multiline
-              error={!!errors.note}
-              helperText={errors.note ? '必須です' : ''}
+              error={!!errors.description}
+              helperText={errors.description ? '必須です' : ''}
             />
           }
         />
@@ -98,14 +104,18 @@ export const Facility: React.VFC = () => {
         <Chip
           label={system.createUser.displayName}
           avatar={<Avatar src={system.createUser.face} />}
+          className={style.userChip}
         ></Chip>
         {dayjs(new Date()).format('YYYY-MM-DD HH:mm')}
+
         <InputLabel shrink>更新者</InputLabel>
         <Chip
           label={system.lastUpdateUser.displayName}
           avatar={<Avatar src={system.createUser.face} />}
+          className={style.userChip}
         ></Chip>
         {dayjs(new Date()).format('YYYY-MM-DD HH:mm')}
+
         <Grid container>
           <Grid item xs={6}>
             <Button className={style.cancelButton} startIcon={<DeleteIcon />}>
