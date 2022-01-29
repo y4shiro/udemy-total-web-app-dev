@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { ChangeEvent, useCallback, useState } from 'react';
 import {
   Avatar,
   Button,
@@ -10,9 +10,14 @@ import {
   TextField,
   makeStyles,
 } from '@material-ui/core';
-import { Done as DoneIcon, Delete as DeleteIcon } from '@material-ui/icons';
-
+import {
+  Done as DoneIcon,
+  Delete as DeleteIcon,
+  ErrorSharp,
+} from '@material-ui/icons';
 import dayjs from 'dayjs';
+import { useForm, Controller } from 'react-hook-form';
+
 import { IFacility } from '../models/IFacility';
 
 const useStyle = makeStyles((theme) => ({
@@ -56,12 +61,43 @@ export const Facility: React.VFC = () => {
   const style = useStyle();
   const [facility, setFacility] = useState(initFacility);
   const { system } = initFacility;
+  const { register, errors, control } = useForm({
+    defaultValues: initFacility,
+    mode: 'onBlur',
+  });
 
   return (
     <Container maxWidth="sm" className={style.root}>
       <Paper className={style.paper}>
-        <TextField label="設備名" fullWidth value={facility.name} />
-        <TextField label="詳細" fullWidth multiline value={facility.note} />
+        <Controller
+          control={control}
+          name="name"
+          rules={{ required: true }}
+          as={
+            <TextField
+              label="設備名"
+              fullWidth
+              error={!!errors.name}
+              helperText={errors.name ? '必須です' : ''}
+            />
+          }
+        />
+
+        <Controller
+          control={control}
+          name="note"
+          rules={{ required: true }}
+          as={
+            <TextField
+              label="詳細"
+              fullWidth
+              multiline
+              error={!!errors.note}
+              helperText={errors.note ? '必須です' : ''}
+            />
+          }
+        />
+
         <InputLabel shrink>登録者</InputLabel>
         <p>
           <Chip
