@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import dayjs, { Dayjs } from 'dayjs';
+import React, { useMemo, useState } from 'react';
+import dayjs from 'dayjs';
 import { Controller, useForm } from 'react-hook-form';
 
 import {
@@ -7,17 +7,20 @@ import {
   Button,
   Chip,
   Container,
+  FormControl,
   Grid,
   InputLabel,
   makeStyles,
+  MenuItem,
   Paper,
+  Select,
   TextField,
 } from '@material-ui/core';
 import { Done as DoneIcon, Delete as DeleteIcon } from '@material-ui/icons';
 import { DateTimePicker } from '@material-ui/pickers';
-import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 
 import { IReservation } from '../models/IReservation';
+import { IFacility } from '../models/IFacility';
 
 const initReservation: IReservation = {
   id: '001',
@@ -42,14 +45,39 @@ const initReservation: IReservation = {
   },
 };
 
-const useStyle = makeStyles((theme) => ({
-  root: {
-    '& .MuiTextField-root': {
-      margin: theme.spacing(1),
-    },
+const dummyFacilities: IFacility[] = [
+  {
+    id: '01',
+    name: '設備００１',
+    // ダミーデータのため不必要なデータの定義は省略
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    system: {} as any,
+    note: '',
   },
+  {
+    id: '02',
+    name: '設備００２',
+    // ダミーデータのため不必要なデータの定義は省略
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    system: {} as any,
+    note: '',
+  },
+  {
+    id: '03',
+    name: '設備００３',
+    // ダミーデータのため不必要なデータの定義は省略
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    system: {} as any,
+    note: '',
+  },
+];
+
+const useStyle = makeStyles((theme) => ({
   paper: {
     padding: theme.spacing(1),
+    '& > div': {
+      marginBottom: theme.spacing(2),
+    },
   },
   rightActions: {
     textAlign: 'right',
@@ -70,44 +98,72 @@ export const Reservation: React.VFC = () => {
     mode: 'onBlur',
   });
 
-  return (
-    <Container maxWidth="sm" className={style.root}>
-      <Paper className={style.paper}>
-        <Controller
-          control={control}
-          name="startDate"
-          render={(data) => {
-            return (
-              <DateTimePicker
-                value={data.value}
-                onChange={data.onChange}
-                onBlur={data.onBlur}
-                label="開始時刻"
-                format="YYYY/MM/DD HH:mm"
-                ampm={false}
-                minutesStep={15}
-              />
-            );
-          }}
-        />
+  const [facilities, setFacilities] = useState<IFacility[]>(dummyFacilities);
+  const facilityMenuItems = useMemo(() => {
+    return facilities.map((f) => (
+      <MenuItem key={f.id} value={f.id}>
+        {f.name}
+      </MenuItem>
+    ));
+  }, [facilities]);
 
-        <Controller
-          control={control}
-          name="endDate"
-          render={(data) => {
-            return (
-              <DateTimePicker
-                value={data.value}
-                onChange={data.onChange}
-                onBlur={data.onBlur}
-                label="終了時刻"
-                format="YYYY/MM/DD HH:mm"
-                ampm={false}
-                minutesStep={15}
-              />
-            );
-          }}
-        />
+  return (
+    <Container maxWidth="sm">
+      <Paper className={style.paper}>
+        <FormControl>
+          <InputLabel id="facility-label">設備</InputLabel>
+          <Controller
+            name="facilityId"
+            control={control}
+            render={({ value, onChange }) => (
+              <Select
+                labelId="facility-label"
+                value={value}
+                onChange={onChange}
+              >
+                {facilityMenuItems}
+              </Select>
+            )}
+          ></Controller>
+        </FormControl>
+
+        <div style={{ display: 'flex' }}>
+          <Controller
+            control={control}
+            name="startDate"
+            render={(data) => {
+              return (
+                <DateTimePicker
+                  value={data.value}
+                  onChange={data.onChange}
+                  onBlur={data.onBlur}
+                  label="開始時刻"
+                  format="YYYY/MM/DD HH:mm"
+                  ampm={false}
+                  minutesStep={15}
+                />
+              );
+            }}
+          />
+          〜
+          <Controller
+            control={control}
+            name="endDate"
+            render={(data) => {
+              return (
+                <DateTimePicker
+                  value={data.value}
+                  onChange={data.onChange}
+                  onBlur={data.onBlur}
+                  label="終了時刻"
+                  format="YYYY/MM/DD HH:mm"
+                  ampm={false}
+                  minutesStep={15}
+                />
+              );
+            }}
+          />
+        </div>
 
         <Controller
           control={control}
