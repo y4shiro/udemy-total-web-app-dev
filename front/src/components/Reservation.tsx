@@ -1,5 +1,6 @@
-import React from 'react';
-import dayjs from 'dayjs';
+import React, { useCallback, useState } from 'react';
+import dayjs, { Dayjs } from 'dayjs';
+import { Controller, useForm } from 'react-hook-form';
 
 import {
   Avatar,
@@ -13,7 +14,8 @@ import {
   TextField,
 } from '@material-ui/core';
 import { Done as DoneIcon, Delete as DeleteIcon } from '@material-ui/icons';
-import { Controller, useForm } from 'react-hook-form';
+import { DateTimePicker } from '@material-ui/pickers';
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 
 import { IReservation } from '../models/IReservation';
 
@@ -71,6 +73,42 @@ export const Reservation: React.VFC = () => {
   return (
     <Container maxWidth="sm" className={style.root}>
       <Paper className={style.paper}>
+        <Controller
+          control={control}
+          name="startDate"
+          render={(data) => {
+            return (
+              <DateTimePicker
+                value={data.value}
+                onChange={data.onChange}
+                onBlur={data.onBlur}
+                label="開始時刻"
+                format="YYYY/MM/DD HH:mm"
+                ampm={false}
+                minutesStep={15}
+              />
+            );
+          }}
+        />
+
+        <Controller
+          control={control}
+          name="endDate"
+          render={(data) => {
+            return (
+              <DateTimePicker
+                value={data.value}
+                onChange={data.onChange}
+                onBlur={data.onBlur}
+                label="終了時刻"
+                format="YYYY/MM/DD HH:mm"
+                ampm={false}
+                minutesStep={15}
+              />
+            );
+          }}
+        />
+
         <Controller
           control={control}
           name="subject"
