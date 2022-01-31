@@ -1,5 +1,6 @@
 import React, { useCallback, useContext } from 'react';
 import dayjs from 'dayjs';
+import { Link } from 'react-router-dom';
 
 import { Button, makeStyles } from '@material-ui/core';
 import { DoubleArrow } from '@material-ui/icons';
@@ -67,7 +68,12 @@ export const ReservationListHeader: React.VFC = () => {
       </div>
 
       <div className={styles.actions}>
-        <Button variant="contained" color="primary">
+        <Button
+          variant="contained"
+          color="primary"
+          component={Link}
+          to="/facility"
+        >
           設備の登録
         </Button>
       </div>
