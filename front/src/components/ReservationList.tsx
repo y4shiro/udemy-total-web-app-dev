@@ -1,4 +1,5 @@
 import React, {
+  createContext,
   useCallback,
   useEffect,
   useMemo,
@@ -6,7 +7,7 @@ import React, {
   useState,
 } from 'react';
 import { Link } from 'react-router-dom';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 import { makeStyles } from '@material-ui/core/styles';
 import {
@@ -162,7 +163,15 @@ const getColor = (n: number) => {
   return colors[index];
 };
 
+type ContextType = {
+  currentDate: Dayjs;
+};
+
+export const CurrentDateContext = createContext<ContextType>({} as ContextType);
+
 export const ReservationList: React.VFC = () => {
+  const [currentDate] = useState(dayjs('2022-01-01'));
+
   const cell = useRef<HTMLDivElement>(null);
   const [cellWidth, setCellWidth] = useState<number>(0);
   const styles = useStyles();
@@ -218,14 +227,16 @@ export const ReservationList: React.VFC = () => {
 
   return (
     <div>
-      <ReservationListHeader />
-      <div>
-        <div className={styles.lane}>
-          <div className="laneHeader"></div>
-          {headerCells}
+      <CurrentDateContext.Provider value={{ currentDate }}>
+        <ReservationListHeader />
+        <div>
+          <div className={styles.lane}>
+            <div className="laneHeader"></div>
+            {headerCells}
+          </div>
+          {lanes}
         </div>
-        {lanes}
-      </div>
+      </CurrentDateContext.Provider>
     </div>
   );
 };

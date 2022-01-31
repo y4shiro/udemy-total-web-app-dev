@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import dayjs from 'dayjs';
 
 import { Button, makeStyles } from '@material-ui/core';
 import { DoubleArrow } from '@material-ui/icons';
 import { DatePicker } from '@material-ui/pickers';
+
+import { CurrentDateContext } from './ReservationList';
 
 const useStyles = makeStyles(() => ({
   header: {
@@ -31,6 +33,7 @@ const useStyles = makeStyles(() => ({
 
 export const ReservationListHeader: React.VFC = () => {
   const styles = useStyles();
+  const context = useContext(CurrentDateContext);
 
   return (
     <div>
@@ -42,7 +45,7 @@ export const ReservationListHeader: React.VFC = () => {
         </div>
         <div>
           <DatePicker
-            value={dayjs()}
+            value={context.currentDate}
             className={styles.date}
             format="YYYY-MM-DD"
             onChange={() => {}}
