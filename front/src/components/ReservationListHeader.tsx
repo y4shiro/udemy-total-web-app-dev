@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useCallback, useContext } from 'react';
 import dayjs from 'dayjs';
 
 import { Button, makeStyles } from '@material-ui/core';
@@ -6,6 +6,7 @@ import { DoubleArrow } from '@material-ui/icons';
 import { DatePicker } from '@material-ui/pickers';
 
 import { CurrentDateContext } from './ReservationList';
+import { MaterialUiPickersDate } from '@material-ui/pickers/typings/date';
 
 const useStyles = makeStyles(() => ({
   header: {
@@ -33,7 +34,15 @@ const useStyles = makeStyles(() => ({
 
 export const ReservationListHeader: React.VFC = () => {
   const styles = useStyles();
-  const context = useContext(CurrentDateContext);
+  const { currentDate, dispatch } = useContext(CurrentDateContext);
+
+  const changeDate = useCallback(
+    (date: MaterialUiPickersDate) => {
+      if (!date) return;
+      dispatch({ payload: date, type: 'ChangeDate' });
+    },
+    [dispatch],
+  );
 
   return (
     <div>
@@ -45,10 +54,10 @@ export const ReservationListHeader: React.VFC = () => {
         </div>
         <div>
           <DatePicker
-            value={context.currentDate}
+            value={currentDate}
             className={styles.date}
             format="YYYY-MM-DD"
-            onChange={() => {}}
+            onChange={changeDate}
           />
           <p className={styles.weekday}>{dayjs().format('dddd')}</p>
         </div>

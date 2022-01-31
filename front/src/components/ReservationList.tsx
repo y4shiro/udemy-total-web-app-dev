@@ -1,8 +1,11 @@
 import React, {
   createContext,
+  Dispatch,
+  Reducer,
   useCallback,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
   useState,
 } from 'react';
@@ -163,14 +166,44 @@ const getColor = (n: number) => {
   return colors[index];
 };
 
+// Context の Action を定義していく
+type ActionType = 'ChangeDate' | 'NextDay' | 'PrevDay';
+
+type Action = {
+  type: ActionType;
+  payload?: Dayjs;
+};
+
+// Context の Reducer を定義していく
+type StateType = {
+  currentDate: Dayjs;
+};
+
+const reducerProcessers: {
+  [type in ActionType]: (s: StateType, a: Action) => StateType;
+} = {
+  ChangeDate: (s, a) => {
+    return a.payload ? { ...s, currentDate: a.payload } : s;
+  },
+
+  NextDay: (s) => ({ ...s, currentDate: s.currentDate.add(1, 'day') }),
+
+  PrevDay: (s) => ({ ...s, currentDate: s.currentDate.add(-1, 'day') }),
+};
+
+const reducer: Reducer<StateType, Action> = (state, action) => {
+  return reducerProcessers[action.type](state, action);
+};
+
 type ContextType = {
   currentDate: Dayjs;
+  dispatch: Dispatch<Action>;
 };
 
 export const CurrentDateContext = createContext<ContextType>({} as ContextType);
 
 export const ReservationList: React.VFC = () => {
-  const [currentDate] = useState(dayjs('2022-01-01'));
+  const [state, dispatch] = useReducer(reducer, { currentDate: dayjs() });
 
   const cell = useRef<HTMLDivElement>(null);
   const [cellWidth, setCellWidth] = useState<number>(0);
@@ -227,7 +260,9 @@ export const ReservationList: React.VFC = () => {
 
   return (
     <div>
-      <CurrentDateContext.Provider value={{ currentDate }}>
+      <CurrentDateContext.Provider
+        value={{ currentDate: state.currentDate, dispatch }}
+      >
         <ReservationListHeader />
         <div>
           <div className={styles.lane}>
