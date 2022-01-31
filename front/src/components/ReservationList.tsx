@@ -23,6 +23,7 @@ import {
 import { IFacility } from '../models/IFacility';
 import { IReservation } from '../models/IReservation';
 import { FacilityLane } from './FacilityLane';
+import { ReservationListHeader } from './ReservationListHeader';
 
 const dummyFacilities: IFacility[] = [
   {
@@ -217,6 +218,7 @@ export const ReservationList: React.VFC = () => {
 
   return (
     <div>
+      <ReservationListHeader />
       <div>
         <div className={styles.lane}>
           <div className="laneHeader"></div>
