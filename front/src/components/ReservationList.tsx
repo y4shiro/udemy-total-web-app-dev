@@ -1,4 +1,10 @@
-import React, { useMemo } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Link } from 'react-router-dom';
 import dayjs from 'dayjs';
 
@@ -156,11 +162,32 @@ const getColor = (n: number) => {
 };
 
 export const ReservationList: React.VFC = () => {
+  const cell = useRef<HTMLDivElement>(null);
+  const [cellWidth, setCellWidth] = useState<number>(0);
   const styles = useStyles();
+
+  const onResize = useCallback(() => {
+    if (!cell?.current) return;
+    setCellWidth(cell.current.getBoundingClientRect().width);
+  }, [cell]);
+  useEffect(onResize, [cell]);
+  useEffect(() => {
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  }, []);
 
   const headerCells = useMemo(() => {
     const cells: JSX.Element[] = [];
-    for (let i = 8; i <= 19; i++) {
+    // 8 時のセルのみ useRef を適用
+    cells.push(
+      <div key={8} ref={cell} className="timeCell">
+        8
+      </div>,
+    );
+
+    for (let i = 9; i <= 19; i++) {
       cells.push(
         <div key={i} className="timeCell">
           {i}
@@ -178,7 +205,7 @@ export const ReservationList: React.VFC = () => {
       return (
         <FacilityLane
           key={facility.id}
-          cellWidth={30}
+          cellWidth={cellWidth}
           facility={facility}
           reservations={reservations}
           className={styles.lane}
@@ -186,7 +213,7 @@ export const ReservationList: React.VFC = () => {
         />
       );
     });
-  }, [styles.lane]);
+  }, [styles.lane, cellWidth]);
 
   return (
     <div>
