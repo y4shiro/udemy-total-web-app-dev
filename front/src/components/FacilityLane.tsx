@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import { IFacility } from '../models/IFacility';
 import { Property } from 'csstype';
-import { makeStyles } from '@material-ui/styles';
-import { Theme } from '@material-ui/core';
+import { makeStyles, Theme } from '@material-ui/core/styles';
 
+import { IFacility } from '../models/IFacility';
 import { IReservation } from '../models/IReservation';
+
 import { ReservationBar } from './ReservationBar';
 
 type Props = JSX.IntrinsicElements['div'] & {
@@ -27,7 +27,6 @@ const useStyles = makeStyles<
 export const FacilityLane: React.VFC<Props> = (props) => {
   const { cellWidth, facility, reservations, backgroundColor, ...rootAttr } =
     props;
-
   const styles = useStyles({ backgroundColor });
 
   const cells = useMemo(() => {
@@ -35,6 +34,7 @@ export const FacilityLane: React.VFC<Props> = (props) => {
     for (let i = 0; i <= 11; i++) {
       r.push(<div key={i} className="timeCell"></div>);
     }
+    return r;
   }, []);
 
   const bars = useMemo(() => {
