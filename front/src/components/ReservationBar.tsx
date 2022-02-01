@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { IReservation } from '../models/IReservation';
 import { Property } from 'csstype';
 import { makeStyles } from '@material-ui/styles';
-import { PropTypes, Theme } from '@material-ui/core';
+import { Theme } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 
 type PropsType = {
