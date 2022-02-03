@@ -1,8 +1,11 @@
 import express = require('express');
-import { Firestore } from '@google-cloud/firestore';
-import { IReservation } from './models/IReservation';
+import { DocumentReference, Firestore } from '@google-cloud/firestore';
+
 import dayjs = require('dayjs');
 import tz = require('dayjs/plugin/timezone');
+
+import { IReservation } from './models/IReservation';
+import { ISystem } from './models/ISystem';
 
 dayjs.extend(tz);
 dayjs.tz.setDefault('Asia/Tokyo');
@@ -36,6 +39,77 @@ app.get('/', async (req, res) => {
   });
 
   res.json(reservations);
+});
+
+app.get('/:id', async (req, res) => {
+  const id = req.params.id;
+  const docRef = getCollection().doc(id);
+  const snapshot = await docRef.get();
+
+  if (!snapshot.exists) {
+    res.status(404).send();
+    return;
+  }
+
+  const data = snapshot.data() as IReservation;
+  data.id = docRef.id;
+  res.json(data);
+});
+
+// 日付型は JSON に無いので、受け取った文字列を変換する必要がある
+// これはリクエストで受け取る JSON の型定義
+type RequestReservation = Omit<IReservation, 'startDate' | 'endDate'> & {
+  startDate: string;
+  endDate: string;
+};
+
+// こちらは DB 側の型定義
+type DbReservation = Omit<
+  IReservation,
+  'facilityId' | 'startDate' | 'endDate'
+> & {
+  facilityId: DocumentReference;
+  startDate: Date;
+  endDate: Date;
+};
+
+// リクエストの JSON を DB の型に変換する
+const convertToDbType = (reqBody: RequestReservation): DbReservation => {
+  const facility = firestore.doc('facilities/' + reqBody.facilityId);
+  delete (reqBody as any).id;
+
+  return {
+    ...reqBody,
+    facilityId: facility,
+    startDate: new Date(reqBody.startDate),
+    endDate: new Date(reqBody.endDate),
+  };
+};
+
+app.post('/', async (req, res) => {
+  const data = convertToDbType(req.body);
+  const now = new Date();
+  const addData = {
+    ...data,
+    system: {
+      createDate: now,
+      createUser: {
+        displayName: '',
+        email: '',
+        face: '',
+      },
+      lastUpdate: now,
+      lastUpdateUser: {
+        displayName: '',
+        email: '',
+        face: '',
+      },
+    } as ISystem,
+  };
+
+  const docRef = await getCollection().add(addData);
+  const snapshot = await docRef.get();
+  res.json({ id: snapshot.id });
 });
 
 export default app;
