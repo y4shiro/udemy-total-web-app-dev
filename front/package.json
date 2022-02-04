@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "yarn webpack-dev-server"
+    "start": "yarn webpack-dev-server",
+    "build": "yarn webpack"
   },
   "dependencies": {
     "@date-io/dayjs": "1.x",
