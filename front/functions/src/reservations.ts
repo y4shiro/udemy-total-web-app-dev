@@ -8,6 +8,8 @@ import { IReservation } from './models/IReservation';
 import { ISystem } from './models/ISystem';
 import { IFacility } from './models/IFacility';
 
+import { body, param, validationResult } from 'express-validator';
+
 dayjs.extend(tz);
 dayjs.tz.setDefault('Asia/Tokyo');
 
@@ -87,69 +89,101 @@ const convertToDbType = (reqBody: RequestReservation): DbReservation => {
   };
 };
 
-app.post('/', async (req, res) => {
-  const data = convertToDbType(req.body);
-  const now = new Date();
-  const addData = {
-    ...data,
-    system: {
-      createDate: now,
-      createUser: {
-        displayName: '',
-        email: '',
-        face: '',
-      },
-      lastUpdate: now,
-      lastUpdateUser: {
-        displayName: '',
-        email: '',
-        face: '',
-      },
-    } as ISystem,
-  };
+app.post(
+  '/',
+  [
+    body('subject').isString().trim().notEmpty(),
+    body('description').isString(),
+  ],
+  async (req: express.Request, res: express.Response) => {
+    const valid = validationResult(req);
+    if (!valid.isEmpty()) {
+      res.status(400).json({ errors: valid.array() });
+      return;
+    }
 
-  const docRef = await getCollection().add(addData);
-  const snapshot = await docRef.get();
-  res.json({ id: snapshot.id });
-});
+    const data = convertToDbType(req.body);
+    const now = new Date();
+    const addData = {
+      ...data,
+      system: {
+        createDate: now,
+        createUser: {
+          displayName: '',
+          email: '',
+          face: '',
+        },
+        lastUpdate: now,
+        lastUpdateUser: {
+          displayName: '',
+          email: '',
+          face: '',
+        },
+      } as ISystem,
+    };
+
+    const docRef = await getCollection().add(addData);
+    const snapshot = await docRef.get();
+    res.json({ id: snapshot.id });
+  },
+);
 
 // 更新
-app.put('/:id', async (req, res) => {
-  const id = req.params.id;
-  const data = convertToDbType(req.body);
+app.put(
+  '/:id',
+  [param('id').notEmpty()],
+  async (req: express.Request, res: express.Response) => {
+    const valid = validationResult(req);
+    if (!valid.isEmpty()) {
+      res.status(400).json({ errors: valid.array() });
+      return;
+    }
 
-  const docRef = getCollection().doc(id);
-  const snapshot = await docRef.get();
-  if (!snapshot.exists) {
-    res.status(404).send();
-    return;
-  }
+    const id = req.params.id;
+    const data = convertToDbType(req.body);
 
-  const oldData = snapshot.data() as IFacility;
-  const newData = {
-    ...oldData,
-    ...data,
-    system: {
-      ...oldData.system,
-      lastUpdate: new Date(),
-      lastUpdateUser: {
-        displayName: '',
-        email: '',
-        face: '',
-      },
-    } as ISystem,
-  };
+    const docRef = getCollection().doc(id);
+    const snapshot = await docRef.get();
+    if (!snapshot.exists) {
+      res.status(404).send();
+      return;
+    }
 
-  docRef.update(newData);
-  res.status(204).send().end();
-});
+    const oldData = snapshot.data() as IFacility;
+    const newData = {
+      ...oldData,
+      ...data,
+      system: {
+        ...oldData.system,
+        lastUpdate: new Date(),
+        lastUpdateUser: {
+          displayName: '',
+          email: '',
+          face: '',
+        },
+      } as ISystem,
+    };
+
+    docRef.update(newData);
+    res.status(204).send().end();
+  },
+);
 
 // 削除
-app.delete('/:id', async (req, res) => {
-  const id = req.params.id;
-  const docRef = getCollection().doc(id);
-  await docRef.delete();
-  res.status(204).send();
-});
+app.delete(
+  '/:id',
+  [param('id').notEmpty()],
+  async (req: express.Request, res: express.Response) => {
+    const valid = validationResult(req);
+    if (!valid.isEmpty()) {
+      res.status(400).json({ errors: valid.array() });
+      return;
+    }
+    const id = req.params.id;
+    const docRef = getCollection().doc(id);
+    await docRef.delete();
+    res.status(204).send();
+  },
+);
 
 export default app;
