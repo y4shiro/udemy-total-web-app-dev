@@ -18,7 +18,7 @@ const getCollection = () => firestore.collection('reservations');
 
 const app = express();
 
-app.get('/', async (req, res) => {
+app.get('/', async (req, res, next) => {
   const dateString = req.query.date as string;
   const date = dayjs(dateString);
 
@@ -33,7 +33,11 @@ app.get('/', async (req, res) => {
   const snapshot = await getCollection()
     .where('startDate', '>=', begin.toDate())
     .where('startDate', '<=', end.toDate())
-    .get();
+    .get()
+    .catch((e) => {
+      next(e);
+    });
+  if (!snapshot) return;
 
   const reservations = snapshot.docs.map((doc) => {
     const data = doc.data() as IReservation;
@@ -95,7 +99,11 @@ app.post(
     body('subject').isString().trim().notEmpty(),
     body('description').isString(),
   ],
-  async (req: express.Request, res: express.Response) => {
+  async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
     const valid = validationResult(req);
     if (!valid.isEmpty()) {
       res.status(400).json({ errors: valid.array() });
@@ -123,7 +131,10 @@ app.post(
     };
 
     const docRef = await getCollection().add(addData);
-    const snapshot = await docRef.get();
+    const snapshot = await docRef.get().catch((e) => {
+      next(e);
+    });
+    if (!snapshot) return;
     res.json({ id: snapshot.id });
   },
 );
@@ -132,7 +143,11 @@ app.post(
 app.put(
   '/:id',
   [param('id').notEmpty()],
-  async (req: express.Request, res: express.Response) => {
+  async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
     const valid = validationResult(req);
     if (!valid.isEmpty()) {
       res.status(400).json({ errors: valid.array() });
@@ -143,7 +158,10 @@ app.put(
     const data = convertToDbType(req.body);
 
     const docRef = getCollection().doc(id);
-    const snapshot = await docRef.get();
+    const snapshot = await docRef.get().catch((e) => {
+      next(e);
+    });
+    if (!snapshot) return;
     if (!snapshot.exists) {
       res.status(404).send();
       return;
@@ -181,6 +199,7 @@ app.delete(
     }
     const id = req.params.id;
     const docRef = getCollection().doc(id);
+
     await docRef.delete();
     res.status(204).send();
   },
