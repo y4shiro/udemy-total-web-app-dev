@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import dayjs from 'dayjs';
 import { Controller, useForm } from 'react-hook-form';
 
@@ -21,56 +21,36 @@ import { DateTimePicker } from '@material-ui/pickers';
 
 import { IReservation } from '../models/IReservation';
 import { IFacility } from '../models/IFacility';
+import {
+  getReservation,
+  postReservation,
+  putReservation,
+} from '../controllers/reservationController';
+import { useHistory, useParams } from 'react-router-dom';
+import { getFacilities } from '../controllers/facilityController';
 
-const initReservation: IReservation = {
-  id: '001',
-  facilityId: '001',
-  subject: '目的01',
-  description: '説明001',
-  startDate: dayjs(),
-  endDate: dayjs().add(1, 'hour'),
+const initReservation = (): IReservation => ({
+  id: '',
+  facilityId: '',
+  subject: '',
+  description: '',
+  startDate: dayjs().startOf('hour'),
+  endDate: dayjs().add(1, 'hour').startOf('hour'),
   system: {
     createDate: new Date(),
     createUser: {
-      displayName: 'ebihara kenji',
+      displayName: '',
       email: '',
-      face: 'https://img.icons8.com/color/48/000000/human-head.png',
+      face: '',
     },
     lastUpdateUser: {
-      displayName: 'ebihara kenji',
+      displayName: '',
       email: '',
-      face: 'https://img.icons8.com/color/48/000000/human-head.png',
+      face: '',
     },
     lastUpdate: new Date(),
   },
-};
-
-const dummyFacilities: IFacility[] = [
-  {
-    id: '01',
-    name: '設備００１',
-    // ダミーデータのため不必要なデータの定義は省略
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    system: {} as any,
-    note: '',
-  },
-  {
-    id: '02',
-    name: '設備００２',
-    // ダミーデータのため不必要なデータの定義は省略
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    system: {} as any,
-    note: '',
-  },
-  {
-    id: '03',
-    name: '設備００３',
-    // ダミーデータのため不必要なデータの定義は省略
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    system: {} as any,
-    note: '',
-  },
-];
+});
 
 const useStyle = makeStyles((theme) => ({
   paper: {
@@ -92,13 +72,26 @@ const useStyle = makeStyles((theme) => ({
 
 export const Reservation: React.VFC = () => {
   const style = useStyle();
-  const { system } = initReservation;
-  const { errors, control } = useForm<IReservation>({
-    defaultValues: initReservation,
+  const { id } = useParams<{ id: string }>();
+  const [reservation, setReservation] = useState(initReservation());
+  const [facilities, setFacilities] = useState<IFacility[]>([]);
+  const { system } = reservation;
+  const { errors, control, reset, trigger, getValues } = useForm<IReservation>({
+    defaultValues: reservation,
     mode: 'onBlur',
   });
 
-  const [facilities, setFacilities] = useState<IFacility[]>(dummyFacilities);
+  useEffect(() => {
+    getFacilities().then((result) => {
+      setFacilities(result);
+    });
+    if (!id) return;
+    getReservation(id).then((result) => {
+      setReservation(result);
+      reset(result);
+    });
+  }, [id]);
+
   const facilityMenuItems = useMemo(() => {
     return facilities.map((f) => (
       <MenuItem key={f.id} value={f.id}>
@@ -106,6 +99,23 @@ export const Reservation: React.VFC = () => {
       </MenuItem>
     ));
   }, [facilities]);
+
+  const history = useHistory();
+  const onSave = useCallback(async () => {
+    const result = await trigger();
+    if (!result) return;
+    const inputValue = { ...reservation, ...getValues() };
+
+    if (!id) {
+      // 新規作成
+      const id = await postReservation(inputValue);
+      history.replace(`/reservation/${id}`);
+    } else {
+      // 更新
+      await putReservation(inputValue);
+      window.location.reload();
+    }
+  }, [id, reservation, trigger, getValues]);
 
   return (
     <Container maxWidth="sm">
@@ -221,6 +231,7 @@ export const Reservation: React.VFC = () => {
               variant="contained"
               color="primary"
               startIcon={<DoneIcon />}
+              onClick={onSave}
             >
               保存
             </Button>

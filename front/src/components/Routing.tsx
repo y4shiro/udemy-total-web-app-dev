@@ -7,7 +7,7 @@ import { ReservationList } from './ReservationList';
 export const Routing: React.VFC = () => {
   return (
     <Switch>
-      <Route path="/reservation" component={Reservation} />
+      <Route path="/reservation/:id?" component={Reservation} />
       <Route path="/facility" component={Facility} />
       <Route path="/" exact component={ReservationList} />
     </Switch>
