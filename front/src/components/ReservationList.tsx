@@ -27,91 +27,8 @@ import { IFacility } from '../models/IFacility';
 import { IReservation } from '../models/IReservation';
 import { FacilityLane } from './FacilityLane';
 import { ReservationListHeader } from './ReservationListHeader';
-
-const dummyFacilities: IFacility[] = [
-  {
-    id: '01',
-    name: '設備００１',
-    // ダミーデータのため不必要なデータの定義は省略
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    system: {} as any,
-    note: '',
-  },
-  {
-    id: '02',
-    name: '設備００２',
-    // ダミーデータのため不必要なデータの定義は省略
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    system: {} as any,
-    note: '',
-  },
-  {
-    id: '03',
-    name: '設備００３',
-    // ダミーデータのため不必要なデータの定義は省略
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    system: {} as any,
-    note: '',
-  },
-];
-
-const dummyReservations: IReservation[] = [
-  {
-    id: '001',
-    facilityId: '01',
-    subject: '目的０１',
-    description: '説明００１',
-    startDate: dayjs('2021-04-05T09:00'),
-    endDate: dayjs('2021-04-05T09:00').add(1, 'hour'),
-    // ダミーデータのため不必要なデータの定義は省略
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    system: {} as any,
-  },
-  {
-    id: '002',
-    facilityId: '01',
-    subject: '目的０２',
-    description: '説明００１',
-    startDate: dayjs('2021-04-05T11:00'),
-    endDate: dayjs('2021-04-05T11:00').add(0.5, 'hour'),
-    // ダミーデータのため不必要なデータの定義は省略
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    system: {} as any,
-  },
-  {
-    id: '003',
-    facilityId: '02',
-    subject: '目的０３',
-    description: '説明００１',
-    startDate: dayjs('2021-04-05T14:00'),
-    endDate: dayjs('2021-04-05T14:00').add(1.5, 'hour'),
-    // ダミーデータのため不必要なデータの定義は省略
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    system: {} as any,
-  },
-  {
-    id: '004',
-    facilityId: '02',
-    subject: '目的０４',
-    description: '説明００１',
-    startDate: dayjs('2021-04-05T16:00'),
-    endDate: dayjs('2021-04-05T16:00').add(2, 'hour'),
-    // ダミーデータのため不必要なデータの定義は省略
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    system: {} as any,
-  },
-  {
-    id: '005',
-    facilityId: '03',
-    subject: '目的０５',
-    description: '説明００１',
-    startDate: dayjs('2021-04-05T10:00'),
-    endDate: dayjs('2021-04-05T10:00').add(2.5, 'hour'),
-    // ダミーデータのため不必要なデータの定義は省略
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    system: {} as any,
-  },
-];
+import { getFacilities } from '../controllers/facilityController';
+import { getReservations } from '../controllers/reservationController';
 
 const useStyles = makeStyles((theme) => ({
   lane: {
@@ -203,6 +120,19 @@ export const CurrentDateContext = createContext<ContextType>({} as ContextType);
 
 export const ReservationList: React.VFC = () => {
   const [state, dispatch] = useReducer(reducer, { currentDate: dayjs() });
+  const [facilities, setFacilities] = useState<IFacility[]>([]);
+  const [reservations, setReservations] = useState<IReservation[]>([]);
+  useEffect(() => {
+    getFacilities()
+      .then((result) => {
+        setFacilities(result);
+        return getReservations(state.currentDate);
+      })
+      .then((result) => {
+        console.log(result);
+        setReservations(result);
+      });
+  }, [state.currentDate]);
 
   const cell = useRef<HTMLDivElement>(null);
   const [cellWidth, setCellWidth] = useState<number>(0);
@@ -240,8 +170,8 @@ export const ReservationList: React.VFC = () => {
   }, []);
 
   const lanes = useMemo(() => {
-    return dummyFacilities.map((facility, index) => {
-      const reservations = dummyReservations.filter(
+    return facilities.map((facility, index) => {
+      const reservationList = reservations.filter(
         (r) => r.facilityId === facility.id,
       );
       return (
@@ -249,13 +179,13 @@ export const ReservationList: React.VFC = () => {
           key={facility.id}
           cellWidth={cellWidth}
           facility={facility}
-          reservations={reservations}
+          reservations={reservationList}
           className={styles.lane}
           backgroundColor={getColor(index)}
         />
       );
     });
-  }, [styles.lane, cellWidth]);
+  }, [styles.lane, cellWidth, facilities, reservations]);
 
   return (
     <div>
