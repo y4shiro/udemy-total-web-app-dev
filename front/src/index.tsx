@@ -9,6 +9,17 @@ import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/ja';
 
 import { Routing } from './components/Routing';
+import firebase from 'firebase';
+
+const firebaseConfig = {
+  apiKey: 'AIzaSyAE-Afidy-FzOGuf18cK7R2I1mLlpW6-vY',
+  authDomain: 'facility-reservations-f6ba3.firebaseapp.com',
+  projectId: 'facility-reservations-f6ba3',
+  storageBucket: 'facility-reservations-f6ba3.appspot.com',
+  messagingSenderId: '718321852938',
+  appId: '1:718321852938:web:4900a88de9cae4328bf5f3',
+};
+firebase.initializeApp(firebaseConfig);
 
 dayjs.locale('ja');
 
