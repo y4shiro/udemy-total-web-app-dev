@@ -22,6 +22,7 @@ import { DateTimePicker } from '@material-ui/pickers';
 import { IReservation } from '../models/IReservation';
 import { IFacility } from '../models/IFacility';
 import {
+  deleteReservation,
   getReservation,
   postReservation,
   putReservation,
@@ -116,6 +117,12 @@ export const Reservation: React.VFC = () => {
       window.location.reload();
     }
   }, [id, reservation, trigger, getValues]);
+
+  const onDelete = useCallback(async () => {
+    if (!id) return;
+    await deleteReservation(id);
+    history.replace(`/`);
+  }, [id]);
 
   return (
     <Container maxWidth="sm">
@@ -222,7 +229,11 @@ export const Reservation: React.VFC = () => {
 
         <Grid container>
           <Grid item xs={6}>
-            <Button className={style.cancelButton} startIcon={<DeleteIcon />}>
+            <Button
+              className={style.cancelButton}
+              startIcon={<DeleteIcon />}
+              onClick={onDelete}
+            >
               削除
             </Button>
           </Grid>

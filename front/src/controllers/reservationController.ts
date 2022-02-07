@@ -29,3 +29,7 @@ export const putReservation = async (
     .put(`/api/reservations/${encodeURIComponent(reservation.id)}`)
     .send(reservation);
 };
+
+export const deleteReservation = async (id: string): Promise<void> => {
+  await agent.delete(`/api/reservations/${encodeURIComponent(id)}`);
+};
