@@ -9,7 +9,10 @@ import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/ja';
 
 import { Routing } from './components/Routing';
-import firebase from 'firebase';
+import { Login } from './components/Login';
+import firebase from 'firebase/app';
+import 'firebase/app';
+import 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyAE-Afidy-FzOGuf18cK7R2I1mLlpW6-vY',
@@ -45,11 +48,17 @@ superagent.parse['application/json'] = (text: string) => {
   return obj;
 };
 
-ReactDOM.render(
-  <MuiPickersUtilsProvider utils={ExtendedUtils} locale="ja">
-    <BrowserRouter>
-      <Routing />
-    </BrowserRouter>
-  </MuiPickersUtilsProvider>,
-  document.getElementById('container'),
-);
+firebase.auth().onAuthStateChanged((user) => {
+  ReactDOM.render(
+    <MuiPickersUtilsProvider utils={ExtendedUtils} locale="ja">
+      {!!user ? (
+        <BrowserRouter>
+          <Routing />
+        </BrowserRouter>
+      ) : (
+        <Login />
+      )}
+    </MuiPickersUtilsProvider>,
+    document.getElementById('container'),
+  );
+});

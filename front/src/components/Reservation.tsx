@@ -29,29 +29,33 @@ import {
 } from '../controllers/reservationController';
 import { useHistory, useParams } from 'react-router-dom';
 import { getFacilities } from '../controllers/facilityController';
+import { getCurrentUser } from '../auth';
 
-const initReservation = (): IReservation => ({
-  id: '',
-  facilityId: '',
-  subject: '',
-  description: '',
-  startDate: dayjs().startOf('hour'),
-  endDate: dayjs().add(1, 'hour').startOf('hour'),
-  system: {
-    createDate: new Date(),
-    createUser: {
-      displayName: '',
-      email: '',
-      face: '',
+const initReservation = (): IReservation => {
+  const user = getCurrentUser();
+  return {
+    id: '',
+    facilityId: '',
+    subject: '',
+    description: '',
+    startDate: dayjs().startOf('hour'),
+    endDate: dayjs().add(1, 'hour').startOf('hour'),
+    system: {
+      createDate: new Date(),
+      createUser: {
+        displayName: user?.displayName || '',
+        email: user?.email || '',
+        face: user?.photoURL || '',
+      },
+      lastUpdateUser: {
+        displayName: user?.displayName || '',
+        email: user?.email || '',
+        face: user?.photoURL || '',
+      },
+      lastUpdate: new Date(),
     },
-    lastUpdateUser: {
-      displayName: '',
-      email: '',
-      face: '',
-    },
-    lastUpdate: new Date(),
-  },
-});
+  };
+};
 
 const useStyle = makeStyles((theme) => ({
   paper: {
