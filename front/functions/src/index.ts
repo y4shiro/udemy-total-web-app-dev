@@ -5,6 +5,8 @@ import reservations from './reservations';
 
 const app = express();
 
+app.use((req, res, next) => {});
+
 app.use('/api/facilities', facilities);
 app.use('/api/Reservations', reservations);
 
