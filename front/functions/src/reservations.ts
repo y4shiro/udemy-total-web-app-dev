@@ -1,5 +1,6 @@
 import express = require('express');
 import { DocumentReference, Firestore } from '@google-cloud/firestore';
+import { body, param, validationResult } from 'express-validator';
 
 import dayjs = require('dayjs');
 import tz = require('dayjs/plugin/timezone');
@@ -7,8 +8,8 @@ import tz = require('dayjs/plugin/timezone');
 import { IReservation } from './models/IReservation';
 import { ISystem } from './models/ISystem';
 import { IFacility } from './models/IFacility';
-
-import { body, param, validationResult } from 'express-validator';
+import { CustomReqType } from './models/CustomReqType';
+import { NextWeek } from '@material-ui/icons';
 
 dayjs.extend(tz);
 dayjs.tz.setDefault('Asia/Tokyo');
@@ -98,6 +99,8 @@ app.post(
   [
     body('subject').isString().trim().notEmpty(),
     body('description').isString(),
+    body('startDate').notEmpty().isISO8601(),
+    body('endDate').notEmpty().isISO8601(),
   ],
   async (
     req: express.Request,
@@ -112,25 +115,24 @@ app.post(
 
     const data = convertToDbType(req.body);
     const now = new Date();
+    const { user } = req as CustomReqType;
     const addData = {
       ...data,
       system: {
         createDate: now,
-        createUser: {
-          displayName: '',
-          email: '',
-          face: '',
-        },
+        createUser: user,
         lastUpdate: now,
-        lastUpdateUser: {
-          displayName: '',
-          email: '',
-          face: '',
-        },
+        lastUpdateUser: user,
       } as ISystem,
     };
 
-    const docRef = await getCollection().add(addData);
+    const docRef = await getCollection()
+      .add(addData)
+      .catch((e) => {
+        next(e);
+      });
+    if (!docRef) return;
+
     const snapshot = await docRef.get().catch((e) => {
       next(e);
     });
@@ -142,7 +144,13 @@ app.post(
 // 更新
 app.put(
   '/:id',
-  [param('id').notEmpty()],
+  [
+    param('id').notEmpty(),
+    body('subject').isString().trim().notEmpty(),
+    body('description').isString(),
+    body('startDate').notEmpty().isISO8601(),
+    body('endDate').notEmpty().isISO8601(),
+  ],
   async (
     req: express.Request,
     res: express.Response,
@@ -168,17 +176,14 @@ app.put(
     }
 
     const oldData = snapshot.data() as IFacility;
+    const { user } = req as CustomReqType;
     const newData = {
       ...oldData,
       ...data,
       system: {
         ...oldData.system,
         lastUpdate: new Date(),
-        lastUpdateUser: {
-          displayName: '',
-          email: '',
-          face: '',
-        },
+        lastUpdateUser: user,
       } as ISystem,
     };
 
@@ -191,16 +196,18 @@ app.put(
 app.delete(
   '/:id',
   [param('id').notEmpty()],
-  async (req: express.Request, res: express.Response) => {
-    const valid = validationResult(req);
-    if (!valid.isEmpty()) {
-      res.status(400).json({ errors: valid.array() });
-      return;
-    }
+  async (
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
     const id = req.params.id;
     const docRef = getCollection().doc(id);
 
-    await docRef.delete();
+    const result = await docRef.delete().catch((e) => {
+      next(e);
+    });
+    if (!result) return;
     res.status(204).send();
   },
 );
